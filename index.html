@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DukeBet Demo</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #101218;
+      color: white;
+      padding-bottom: 80px;
+    }
+
+    .header {
+      padding: 20px;
+      background: #171a22;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .balance {
+      background: #242936;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .balance span {
+      color: #36d98b;
+      font-weight: bold;
+    }
+
+    .content {
+      padding: 18px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .sports {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      margin-bottom: 25px;
+    }
+
+    .sport {
+      min-width: 90px;
+      background: #1d212b;
+      border-radius: 12px;
+      padding: 15px 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .sport.active {
+      background: #36d98b;
+      color: #08130e;
+    }
+
+    .sport-icon {
+      font-size: 25px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .match {
+      background: #1b1f28;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 14px;
+    }
+
+    .league {
+      color: #9da4b2;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .time {
+      text-align: center;
+      color: #8d94a2;
+      font-size: 12px;
+    }
+
+    .odds {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    .odd {
+      background: #292e39;
+      border: none;
+      color: white;
+      padding: 12px 5px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .odd:hover {
+      background: #36d98b;
+      color: #08130e;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: #171a22;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #292e39;
+    }
+
+    .bottom button {
+      background: none;
+      border: none;
+      color: #9da4b2;
+      font-size: 12px;
+    }
+
+    .bottom button.active {
+      color: #36d98b;
+    }
+
+    .slip {
+      position: fixed;
+      right: 15px;
+      bottom: 80px;
+      background: #36d98b;
+      color: #07110c;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-content {
+      width: 100%;
+      background: #171a22;
+      border-radius: 20px 20px 0 0;
+      padding: 22px;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 18px;
+    }
+
+    .selected {
+      background: #242936;
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .stake {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #353b48;
+      background: #101218;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .place {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #36d98b;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .close {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #292e39;
+      color: white;
+    }
+
+    .empty {
+      color: #8d94a2;
+      text-align: center;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="logo">🏆 DukeBet</div>
+
+    <div class="balance">
+      Demo: <span id="balance">100000</span>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <h2>Sports</h2>
+
+    <div class="sports">
+
+      <div class="sport active" onclick="selectSport(this)">
+        <span class="sport-icon">⚽</span>
+        Football
+      </div>
+
+      <div class="sport" onclick="selectSport(this)">
+        <span class="sport-icon">🏀</span>
+        Basketball
+      </div>
+
+      <div class="sport" onclick="selectSport(this)">
+        <span class="sport-icon">🎾</span>
+        Tennis
+      </div>
+
+    </div>
+
+    <h2>🔥 Popular Matches</h2>
+
+    <div id="matches">
+
+      <div class="match">
+
+        <div class="league">
+          Premier League • Demo Fixture
+        </div>
+
+        <div class="teams">
+          <span>Arsenal</span>
+          <span>Manchester City</span>
+        </div>
+
+        <div class="time">
+          Today • 20:00
+        </div>
+
+        <br>
+
+        <div class="odds">
+
+          <button class="odd"
+            onclick="addBet('Arsenal', 2.10)">
+            Arsenal<br><b>2.10</b>
+          </button>
+
+          <button class="odd"
+            onclick="addBet('Draw', 3.40)">
+            Draw<br><b>3.40</b>
+          </button>
+
+          <button class="odd"
+            onclick="addBet('Manchester City', 3.00)">
+            Man City<br><b>3.00</b>
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="match">
+
+        <div class="league">
+          Premier League • Demo Fixture
+        </div>
+
+        <div class="teams">
+          <span>Chelsea</span>
+          <span>Liverpool</span>
+        </div>
+
+        <div class="time">
+          Tomorrow • 18:30
+        </div>
+
+        <br>
+
+        <div class="odds">
+
+          <button class="odd"
+            onclick="addBet('Chelsea', 2.60)">
+            Chelsea<br><b>2.60</b>
+          </button>
+
+          <button class="odd"
+            onclick="addBet('Draw', 3.20)">
+            Draw<br><b>3.20</b>
+          </button>
+
+          <button class="odd"
+            onclick="addBet('Liverpool', 2.30)">
+            Liverpool<br><b>2.30</b>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div id="empty" class="empty" style="display:none;">
+      More sports will be added soon.
+    </div>
+
+  </main>
+
+
+  <button id="slipButton" class="slip" onclick="openSlip()">
+    🎟 Bet Slip
+  </button>
+
+
+  <div id="slipModal" class="modal">
+
+    <div class="modal-content">
+
+      <h2>🎟 Bet Slip</h2>
+
+      <div class="selected">
+
+        <div id="selection"></div>
+
+        <br>
+
+        <div>
+          Odds:
+          <b id="odds">0</b>
+        </div>
+
+      </div>
+
+      <input
+        id="stake"
+        class="stake"
+        type="number"
+        placeholder="Enter demo stake"
+        oninput="calculate()"
+      >
+
+      <p style="margin-bottom:15px;">
+        Potential return:
+        <b id="return">0</b>
+      </p>
+
+      <button class="place" onclick="placeBet()">
+        PLACE DEMO BET
+      </button>
+
+      <button class="close" onclick="closeSlip()">
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <nav class="bottom">
+
+    <button class="active">
+      🏠<br>Home
+    </button>
+
+    <button onclick="alert('Demo bet history coming next')">
+      🎟<br>My Bets
+    </button>
+
+    <button onclick="alert('Demo profile coming next')">
+      👤<br>Profile
+    </button>
+
+  </nav>
+
+
+  <script>
+
+    let currentBet = null;
+
+    let balance = 100000;
+
+
+    function selectSport(element) {
+
+      document.querySelectorAll('.sport')
+        .forEach(s => s.classList.remove('active'));
+
+      element.classList.add('active');
+
+      if (element.innerText.includes('Football')) {
+
+        document.getElementById('matches').style.display = 'block';
+        document.getElementById('empty').style.display = 'none';
+
+      } else {
+
+        document.getElementById('matches').style.display = 'none';
+        document.getElementById('empty').style.display = 'block';
+
+      }
+
+    }
+
+
+    function addBet(selection, odds) {
+
+      currentBet = {
+        selection: selection,
+        odds: odds
+      };
+
+      document.getElementById('selection').innerText =
+        selection;
+
+      document.getElementById('odds').innerText =
+        odds.toFixed(2);
+
+      document.getElementById('slipButton').style.display =
+        'block';
+
+      alert(selection + ' @ ' + odds.toFixed(2) +
+        ' added to your demo bet slip.');
+
+    }
+
+
+    function openSlip() {
+
+      if (!currentBet) return;
+
+      document.getElementById('slipModal').style.display =
+        'flex';
+
+    }
+
+
+    function closeSlip() {
+
+      document.getElementById('slipModal').style.display =
+        'none';
+
+    }
+
+
+    function calculate() {
+
+      const stake =
+        Number(document.getElementById('stake').value);
+
+      if (!currentBet || !stake) {
+
+        document.getElementById('return').innerText = '0';
+
+        return;
+
+      }
+
+      const potential =
+        stake * currentBet.odds;
+
+      document.getElementById('return').innerText =
+        potential.toLocaleString();
+
+    }
+
+
+    function placeBet() {
+
+      const stake =
+        Number(document.getElementById('stake').value);
+
+      if (!stake || stake <= 0) {
+
+        alert('Enter a valid demo stake.');
+
+        return;
+
+      }
+
+      if (stake > balance) {
+
+        alert('Insufficient demo balance.');
+
+        return;
+
+      }
+
+      balance -= stake;
+
+      document.getElementById('balance').innerText =
+        balance.toLocaleString();
+
+      const potential =
+        stake * currentBet.odds;
+
+      alert(
+        '✅ DEMO BET PLACED\\n\\n' +
+        currentBet.selection +
+        ' @ ' +
+        currentBet.odds.toFixed(2) +
+        '\\n\\nStake: ' +
+        stake.toLocaleString() +
+        '\\nPotential return: ' +
+        potential.toLocaleString()
+      );
+
+      closeSlip();
+
+      document.getElementById('stake').value = '';
+
+      document.getElementById('return').innerText = '0';
+
+    }
+
+  </script>
+
+</body>
+  </html>
