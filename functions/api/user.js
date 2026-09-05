@@ -1,86 +1,167 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (request.method !== "GET") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      {
-        status: 405,
-        headers: { "Content-Type": "application/json" }
-      }
-    );
-  }
-
   try {
-    const url = new URL(request.url);
-    const telegramId = url.searchParams.get("telegram_id");
-    const username = url.searchParams.get("username") || "";
-    const displayName = url.searchParams.get("display_name") || "";
+    // =========================
+    // GET USER
+    // =========================
 
-    if (!telegramId) {
-      return new Response(
-        JSON.stringify({ error: "Telegram ID is required" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    }
+    if (request.method === "GET") {
 
-    let user = await env.DB
-      .prepare(
-        `SELECT telegram_id, username, display_name, balance
-         FROM users
-         WHERE telegram_id = ?`
-      )
-      .bind(telegramId)
-      .first();
+      const url = new URL(request.url);
 
-    if (!user) {
-      await env.DB
+      const telegramId =
+        url.searchParams.get("telegram_id");
+
+      const username =
+        url.searchParams.get("username") || "";
+
+      const displayName =
+        url.searchParams.get("display_name") || "";
+
+
+      if (!telegramId) {
+        return json({
+          error: "Telegram ID is required"
+        }, 400);
+      }
+
+
+      let user = await env.DB
         .prepare(
-          `INSERT INTO users
-           (telegram_id, username, display_name, balance)
-           VALUES (?, ?, ?, 100000)`
-        )
-        .bind(telegramId, username, displayName)
-        .run();
-
-      user = await env.DB
-        .prepare(
-          `SELECT telegram_id, username, display_name, balance
+          `SELECT telegram_id,
+                  username,
+                  display_name,
+                  balance
            FROM users
            WHERE telegram_id = ?`
         )
         .bind(telegramId)
         .first();
-    }
 
-    return new Response(
-      JSON.stringify({
+
+      if (!user) {
+
+        await env.DB
+          .prepare(
+            `INSERT INTO users
+             (telegram_id,
+              username,
+              display_name,
+              balance)
+             VALUES (?, ?, ?, 100000)`
+          )
+          .bind(
+            telegramId,
+            username,
+            displayName
+          )
+          .run();
+
+
+        user = await env.DB
+          .prepare(
+            `SELECT telegram_id,
+                    username,
+                    display_name,
+                    balance
+             FROM users
+             WHERE telegram_id = ?`
+          )
+          .bind(telegramId)
+          .first();
+
+      }
+
+
+      return json({
         success: true,
         user
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json"
-        }
+      });
+
+    }
+
+
+    // =========================
+    // UPDATE BALANCE
+    // =========================
+
+    if (request.method === "POST") {
+
+      const body = await request.json();
+
+      const telegramId =
+        String(body.telegram_id || "");
+
+      const balance =
+        Number(body.balance);
+
+
+      if (!telegramId) {
+        return json({
+          error: "Telegram ID is required"
+        }, 400);
       }
-    );
+
+
+      if (!Number.isFinite(balance) || balance < 0) {
+        return json({
+          error: "Invalid balance"
+        }, 400);
+      }
+
+
+      await env.DB
+        .prepare(
+          `UPDATE users
+           SET balance = ?
+           WHERE telegram_id = ?`
+        )
+        .bind(
+          Math.floor(balance),
+          telegramId
+        )
+        .run();
+
+
+      return json({
+        success: true,
+        balance: Math.floor(balance)
+      });
+
+    }
+
+
+    return json({
+      error: "Method not allowed"
+    }, 405);
+
 
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: "Database error",
-        details: error.message
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
+
+    return json({
+      error: "Server error",
+      details: error.message
+    }, 500);
+
   }
+}
+
+
+// =========================
+// JSON RESPONSE HELPER
+// =========================
+
+function json(data, status = 200) {
+
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
 }
