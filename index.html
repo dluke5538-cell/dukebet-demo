@@ -2,13 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>DukeBet Demo</title>
 
-  <!-- Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -123,7 +128,7 @@
       cursor: pointer;
     }
 
-    .odd:hover {
+    .odd.selected {
       background: #36d98b;
       color: #08130e;
     }
@@ -139,6 +144,7 @@
       justify-content: space-around;
       align-items: center;
       border-top: 1px solid #292e39;
+      z-index: 100;
     }
 
     .bottom button {
@@ -164,6 +170,7 @@
       font-weight: bold;
       cursor: pointer;
       display: none;
+      z-index: 101;
     }
 
     .modal {
@@ -172,17 +179,16 @@
       background: rgba(0,0,0,.75);
       display: none;
       align-items: flex-end;
+      z-index: 200;
     }
 
     .modal-content {
       width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
       background: #171a22;
       border-radius: 20px 20px 0 0;
       padding: 22px;
-    }
-
-    .modal-content h2 {
-      margin-bottom: 18px;
     }
 
     .selected {
@@ -190,6 +196,25 @@
       padding: 14px;
       border-radius: 12px;
       margin-bottom: 15px;
+    }
+
+    .selection-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #353b48;
+    }
+
+    .selection-item:last-child {
+      border-bottom: none;
+    }
+
+    .selection-name {
+      font-weight: bold;
+    }
+
+    .selection-odds {
+      color: #36d98b;
+      font-size: 13px;
+      margin-top: 4px;
     }
 
     .stake {
@@ -239,6 +264,7 @@
       z-index: 9999;
       font-size: 16px;
     }
+
   </style>
 </head>
 
@@ -248,13 +274,20 @@
     Loading DukeBet...
   </div>
 
+
   <header class="header">
-    <div class="logo">🏆 DukeBet</div>
+
+    <div class="logo">
+      🏆 DukeBet
+    </div>
 
     <div class="balance">
-      Demo: <span id="balance">100,000</span>
+      Demo:
+      <span id="balance">100,000</span>
     </div>
+
   </header>
+
 
   <main class="content">
 
@@ -262,26 +295,40 @@
 
     <div class="sports">
 
-      <div class="sport active" onclick="selectSport(this)">
+      <div
+        class="sport active"
+        onclick="selectSport(this)"
+      >
         <span class="sport-icon">⚽</span>
         Football
       </div>
 
-      <div class="sport" onclick="selectSport(this)">
+      <div
+        class="sport"
+        onclick="selectSport(this)"
+      >
         <span class="sport-icon">🏀</span>
         Basketball
       </div>
 
-      <div class="sport" onclick="selectSport(this)">
+      <div
+        class="sport"
+        onclick="selectSport(this)"
+      >
         <span class="sport-icon">🎾</span>
         Tennis
       </div>
 
     </div>
 
+
     <h2>🔥 Popular Matches</h2>
 
+
     <div id="matches">
+
+
+      <!-- ARSENAL VS MAN CITY -->
 
       <div class="match">
 
@@ -302,24 +349,56 @@
 
         <div class="odds">
 
-          <button class="odd"
-            onclick="addBet('Arsenal', 2.10)">
-            Arsenal<br><b>2.10</b>
+          <button
+            class="odd"
+            data-fixture="ARS-MCI-001"
+            onclick="addSelection(
+              this,
+              'ARS-MCI-001',
+              'Arsenal',
+              2.10
+            )"
+          >
+            Arsenal<br>
+            <b>2.10</b>
           </button>
 
-          <button class="odd"
-            onclick="addBet('Draw', 3.40)">
-            Draw<br><b>3.40</b>
+
+          <button
+            class="odd"
+            data-fixture="ARS-MCI-001"
+            onclick="addSelection(
+              this,
+              'ARS-MCI-001',
+              'Draw',
+              3.40
+            )"
+          >
+            Draw<br>
+            <b>3.40</b>
           </button>
 
-          <button class="odd"
-            onclick="addBet('Manchester City', 3.00)">
-            Man City<br><b>3.00</b>
+
+          <button
+            class="odd"
+            data-fixture="ARS-MCI-001"
+            onclick="addSelection(
+              this,
+              'ARS-MCI-001',
+              'Manchester City',
+              3.00
+            )"
+          >
+            Man City<br>
+            <b>3.00</b>
           </button>
 
         </div>
 
       </div>
+
+
+      <!-- CHELSEA VS LIVERPOOL -->
 
       <div class="match">
 
@@ -340,19 +419,48 @@
 
         <div class="odds">
 
-          <button class="odd"
-            onclick="addBet('Chelsea', 2.60)">
-            Chelsea<br><b>2.60</b>
+          <button
+            class="odd"
+            data-fixture="CHE-LIV-001"
+            onclick="addSelection(
+              this,
+              'CHE-LIV-001',
+              'Chelsea',
+              2.60
+            )"
+          >
+            Chelsea<br>
+            <b>2.60</b>
           </button>
 
-          <button class="odd"
-            onclick="addBet('Draw', 3.20)">
-            Draw<br><b>3.20</b>
+
+          <button
+            class="odd"
+            data-fixture="CHE-LIV-001"
+            onclick="addSelection(
+              this,
+              'CHE-LIV-001',
+              'Draw',
+              3.20
+            )"
+          >
+            Draw<br>
+            <b>3.20</b>
           </button>
 
-          <button class="odd"
-            onclick="addBet('Liverpool', 2.30)">
-            Liverpool<br><b>2.30</b>
+
+          <button
+            class="odd"
+            data-fixture="CHE-LIV-001"
+            onclick="addSelection(
+              this,
+              'CHE-LIV-001',
+              'Liverpool',
+              2.30
+            )"
+          >
+            Liverpool<br>
+            <b>2.30</b>
           </button>
 
         </div>
@@ -361,53 +469,82 @@
 
     </div>
 
-    <div id="empty" class="empty" style="display:none;">
+
+    <div
+      id="empty"
+      class="empty"
+      style="display:none;"
+    >
       More sports will be added soon.
     </div>
 
   </main>
 
-  <button id="slipButton" class="slip" onclick="openSlip()">
+
+  <button
+    id="slipButton"
+    class="slip"
+    onclick="openSlip()"
+  >
     🎟 Bet Slip
   </button>
 
-  <div id="slipModal" class="modal">
+
+  <!-- BET SLIP -->
+
+  <div
+    id="slipModal"
+    class="modal"
+  >
 
     <div class="modal-content">
 
       <h2>🎟 Bet Slip</h2>
 
+
       <div class="selected">
 
-        <div id="selection"></div>
+        <div id="selectionList"></div>
 
         <br>
 
         <div>
-          Odds:
-          <b id="odds">0</b>
+          Combined Odds:
+          <b id="odds">0.00</b>
         </div>
 
       </div>
+
 
       <input
         id="stake"
         class="stake"
         type="number"
+        min="1"
         placeholder="Enter demo stake"
         oninput="calculate()"
       >
+
 
       <p style="margin-bottom:15px;">
         Potential return:
         <b id="return">0</b>
       </p>
 
-      <button class="place" onclick="placeBet()">
+
+      <button
+        id="placeButton"
+        class="place"
+        onclick="placeBet()"
+      >
         PLACE DEMO BET
       </button>
 
-      <button class="close" onclick="closeSlip()">
+
+      <button
+        class="close"
+        onclick="closeSlip()"
+      >
         Close
       </button>
 
@@ -415,105 +552,147 @@
 
   </div>
 
+
   <nav class="bottom">
 
     <button class="active">
-      🏠<br>Home
+      🏠<br>
+      Home
     </button>
 
-    <button onclick="alert('Demo bet history coming next')">
-      🎟<br>My Bets
+    <button
+      onclick="alert('Demo bet history coming next')"
+    >
+      🎟<br>
+      My Bets
     </button>
 
-    <button onclick="alert('Demo profile coming next')">
-      👤<br>Profile
+    <button
+      onclick="alert('Demo profile coming next')"
+    >
+      👤<br>
+      Profile
     </button>
 
   </nav>
 
+
   <script>
 
-    // ==============================
-    // TELEGRAM MINI APP
-    // ==============================
+    // ============================
+    // TELEGRAM
+    // ============================
 
-    const tg = window.Telegram.WebApp;
+    const tg =
+      window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
 
+
+    // ============================
+    // STATE
+    // ============================
+
     let telegramUser = null;
-    let currentBet = null;
+
     let balance = 100000;
 
+    let selections = [];
 
-    // ==============================
-    // LOAD USER FROM DATABASE
-    // ==============================
+
+    // ============================
+    // LOAD USER
+    // ============================
 
     async function loadUser() {
 
       try {
 
-        const user = tg.initDataUnsafe.user;
+        const user =
+          tg.initDataUnsafe.user;
+
 
         if (!user) {
 
-          document.getElementById('loading').innerText =
+          document.getElementById(
+            'loading'
+          ).innerText =
             'Please open DukeBet from Telegram.';
 
           return;
 
         }
 
+
         telegramUser = user;
 
-        const params = new URLSearchParams({
 
-          telegram_id: String(user.id),
+        const params =
+          new URLSearchParams({
 
-          username: user.username || '',
+            telegram_id:
+              String(user.id),
 
-          display_name:
-            ((user.first_name || '') + ' ' +
-             (user.last_name || '')).trim()
+            username:
+              user.username || '',
 
-        });
+            display_name:
+              (
+                (user.first_name || '') +
+                ' ' +
+                (user.last_name || '')
+              ).trim()
 
-
-        const response = await fetch(
-          '/api/user?' + params.toString()
-        );
-
-
-        const data = await response.json();
+          });
 
 
-        if (!response.ok || !data.success) {
+        const response =
+          await fetch(
+            '/api/user?' +
+            params.toString()
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
 
           throw new Error(
-            data.error || 'Unable to load account'
+            data.error ||
+            'Unable to load account'
           );
 
         }
 
 
-        balance = Number(data.user.balance);
+        balance =
+          Number(
+            data.user.balance
+          );
 
 
-        document.getElementById('balance').innerText =
-          balance.toLocaleString();
+        updateBalance();
 
 
-        document.getElementById('loading').style.display =
-          'none';
+        document.getElementById(
+          'loading'
+        ).style.display = 'none';
 
 
       } catch (error) {
 
         console.error(error);
 
-        document.getElementById('loading').innerText =
+
+        document.getElementById(
+          'loading'
+        ).innerText =
           'Unable to connect to DukeBet. Please reopen the Mini App.';
 
       }
@@ -521,160 +700,360 @@
     }
 
 
-    // ==============================
-    // SAVE BALANCE
-    // ==============================
+    // ============================
+    // BALANCE DISPLAY
+    // ============================
 
-    async function saveBalance() {
+    function updateBalance() {
 
-      if (!telegramUser) return;
-
-      try {
-
-        await fetch('/api/user', {
-
-          method: 'POST',
-
-          headers: {
-            'Content-Type': 'application/json'
-          },
-
-          body: JSON.stringify({
-
-            telegram_id: String(telegramUser.id),
-
-            balance: balance
-
-          })
-
-        });
-
-      } catch (error) {
-
-        console.error(
-          'Balance save failed:',
-          error
-        );
-
-      }
+      document.getElementById(
+        'balance'
+      ).innerText =
+        balance.toLocaleString();
 
     }
 
 
-    // ==============================
+    // ============================
     // SPORTS
-    // ==============================
+    // ============================
 
     function selectSport(element) {
 
-      document.querySelectorAll('.sport')
+      document
+        .querySelectorAll('.sport')
         .forEach(s =>
           s.classList.remove('active')
         );
 
+
       element.classList.add('active');
 
 
-      if (element.innerText.includes('Football')) {
+      if (
+        element.innerText.includes(
+          'Football'
+        )
+      ) {
 
-        document.getElementById('matches')
-          .style.display = 'block';
+        document.getElementById(
+          'matches'
+        ).style.display = 'block';
 
-        document.getElementById('empty')
-          .style.display = 'none';
+
+        document.getElementById(
+          'empty'
+        ).style.display = 'none';
 
       } else {
 
-        document.getElementById('matches')
-          .style.display = 'none';
+        document.getElementById(
+          'matches'
+        ).style.display = 'none';
 
-        document.getElementById('empty')
-          .style.display = 'block';
+
+        document.getElementById(
+          'empty'
+        ).style.display = 'block';
 
       }
 
     }
 
 
-    // ==============================
-    // ADD BET
-    // ==============================
+    // ============================
+    // ADD / REMOVE SELECTION
+    // ============================
 
-    function addBet(selection, odds) {
+    function addSelection(
+      button,
+      fixtureId,
+      selection,
+      odds
+    ) {
 
-      currentBet = {
+      // Check if this fixture already
+      // has a selection
 
-        selection: selection,
-
-        odds: odds
-
-      };
-
-
-      document.getElementById('selection')
-        .innerText = selection;
-
-
-      document.getElementById('odds')
-        .innerText = odds.toFixed(2);
+      const existingIndex =
+        selections.findIndex(
+          item =>
+            item.fixture_id === fixtureId
+        );
 
 
-      document.getElementById('slipButton')
-        .style.display = 'block';
+      if (
+        existingIndex !== -1
+      ) {
+
+        // Remove old button style
+
+        document
+          .querySelectorAll(
+            `[data-fixture="${fixtureId}"]`
+          )
+          .forEach(btn =>
+            btn.classList.remove(
+              'selected'
+            )
+          );
+
+
+        // If clicking the same selection,
+        // remove it completely.
+
+        if (
+          selections[existingIndex]
+            .selection === selection
+        ) {
+
+          selections.splice(
+            existingIndex,
+            1
+          );
+
+          updateSlip();
+
+          return;
+
+        }
+
+
+        // Otherwise replace selection
+
+        selections[
+          existingIndex
+        ] = {
+
+          fixture_id:
+            fixtureId,
+
+          selection:
+            selection,
+
+          odds:
+            odds
+
+        };
+
+
+      } else {
+
+        selections.push({
+
+          fixture_id:
+            fixtureId,
+
+          selection:
+            selection,
+
+          odds:
+            odds
+
+        });
+
+      }
+
+
+      // Clear selection style
+      // for this fixture
+
+      document
+        .querySelectorAll(
+          `[data-fixture="${fixtureId}"]`
+        )
+        .forEach(btn =>
+          btn.classList.remove(
+            'selected'
+          )
+        );
+
+
+      button.classList.add(
+        'selected'
+      );
+
+
+      updateSlip();
 
 
       alert(
         selection +
         ' @ ' +
         odds.toFixed(2) +
-        ' added to your demo bet slip.'
+        ' added to your bet slip.'
       );
 
     }
 
 
-    // ==============================
+    // ============================
+    // UPDATE BET SLIP
+    // ============================
+
+    function updateSlip() {
+
+      const list =
+        document.getElementById(
+          'selectionList'
+        );
+
+
+      list.innerHTML = '';
+
+
+      if (
+        selections.length === 0
+      ) {
+
+        document.getElementById(
+          'slipButton'
+        ).style.display = 'none';
+
+
+        return;
+
+      }
+
+
+      selections.forEach(
+        item => {
+
+          const div =
+            document.createElement(
+              'div'
+            );
+
+
+          div.className =
+            'selection-item';
+
+
+          div.innerHTML = `
+
+            <div class="selection-name">
+              ${item.selection}
+            </div>
+
+            <div class="selection-odds">
+              @ ${item.odds.toFixed(2)}
+            </div>
+
+          `;
+
+
+          list.appendChild(div);
+
+        }
+      );
+
+
+      document.getElementById(
+        'slipButton'
+      ).style.display =
+        'block';
+
+
+      calculate();
+
+    }
+
+
+    // ============================
+    // COMBINED ODDS
+    // ============================
+
+    function getTotalOdds() {
+
+      let total = 1;
+
+
+      selections.forEach(
+        item => {
+
+          total *=
+            Number(item.odds);
+
+        }
+      );
+
+
+      return Number(
+        total.toFixed(2)
+      );
+
+    }
+
+
+    // ============================
     // OPEN SLIP
-    // ==============================
+    // ============================
 
     function openSlip() {
 
-      if (!currentBet) return;
+      if (
+        selections.length === 0
+      ) return;
 
-      document.getElementById('slipModal')
-        .style.display = 'flex';
+
+      document.getElementById(
+        'slipModal'
+      ).style.display =
+        'flex';
+
+
+      updateSlip();
 
     }
 
 
-    // ==============================
+    // ============================
     // CLOSE SLIP
-    // ==============================
+    // ============================
 
     function closeSlip() {
 
-      document.getElementById('slipModal')
-        .style.display = 'none';
+      document.getElementById(
+        'slipModal'
+      ).style.display =
+        'none';
 
     }
 
 
-    // ==============================
+    // ============================
     // CALCULATE RETURN
-    // ==============================
+    // ============================
 
     function calculate() {
 
       const stake =
         Number(
-          document.getElementById('stake').value
+          document.getElementById(
+            'stake'
+          ).value
         );
 
 
-      if (!currentBet || !stake) {
+      const totalOdds =
+        getTotalOdds();
 
-        document.getElementById('return')
-          .innerText = '0';
+
+      document.getElementById(
+        'odds'
+      ).innerText =
+        totalOdds.toFixed(2);
+
+
+      if (
+        !stake ||
+        selections.length === 0
+      ) {
+
+        document.getElementById(
+          'return'
+        ).innerText =
+          '0';
 
         return;
 
@@ -682,111 +1061,216 @@
 
 
       const potential =
-        stake * currentBet.odds;
+        stake * totalOdds;
 
 
-      document.getElementById('return')
-        .innerText =
+      document.getElementById(
+        'return'
+      ).innerText =
         potential.toLocaleString();
 
     }
 
 
-    // ==============================
-    // PLACE DEMO BET
-    // ==============================
+    // ============================
+    // PLACE BET
+    // ============================
 
     async function placeBet() {
 
+      if (
+        !telegramUser
+      ) {
+
+        alert(
+          'Your Telegram account has not loaded yet.'
+        );
+
+        return;
+
+      }
+
+
+      if (
+        selections.length === 0
+      ) {
+
+        alert(
+          'Select at least one outcome.'
+        );
+
+        return;
+
+      }
+
+
       const stake =
         Number(
-          document.getElementById('stake').value
+          document.getElementById(
+            'stake'
+          ).value
         );
 
 
-      if (!stake || stake <= 0) {
+      if (
+        !stake ||
+        stake <= 0
+      ) {
 
-        alert('Enter a valid demo stake.');
-
-        return;
-
-      }
-
-
-      if (stake > balance) {
-
-        alert('Insufficient demo balance.');
+        alert(
+          'Enter a valid demo stake.'
+        );
 
         return;
 
       }
 
 
-      if (!telegramUser) {
+      if (
+        stake > balance
+      ) {
 
-        alert('Your Telegram account has not loaded yet.');
+        alert(
+          'Insufficient demo balance.'
+        );
 
         return;
 
       }
 
 
-      balance -= stake;
+      const button =
+        document.getElementById(
+          'placeButton'
+        );
 
 
-      document.getElementById('balance')
-        .innerText =
-        balance.toLocaleString();
+      button.disabled = true;
+
+      button.innerText =
+        'PLACING BET...';
 
 
-      const potential =
-        stake * currentBet.odds;
+      try {
+
+        const response =
+          await fetch(
+            '/api/bets',
+            {
+
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+
+              body: JSON.stringify({
+
+                telegram_id:
+                  String(
+                    telegramUser.id
+                  ),
+
+                stake:
+                  stake,
+
+                selections:
+                  selections
+
+              })
+
+            }
+          );
 
 
-      await saveBalance();
+        const data =
+          await response.json();
 
 
-      alert(
+        if (
+          !response.ok ||
+          !data.success
+        ) {
 
-        '✅ DEMO BET PLACED\n\n' +
+          throw new Error(
+            data.error ||
+            'Bet placement failed'
+          );
 
-        currentBet.selection +
-
-        ' @ ' +
-
-        currentBet.odds.toFixed(2) +
-
-        '\n\nStake: ' +
-
-        stake.toLocaleString() +
-
-        '\nPotential return: ' +
-
-        potential.toLocaleString()
-
-      );
+        }
 
 
-      closeSlip();
+        // Update local balance
+
+        balance =
+          Number(
+            data.balance
+          );
 
 
-      document.getElementById('stake')
-        .value = '';
+        updateBalance();
 
 
-      document.getElementById('return')
-        .innerText = '0';
-
-    }
+        const bet =
+          data.bet;
 
 
-    // ==============================
-    // START
-    // ==============================
+        let selectionText =
+          selections
+            .map(
+              item =>
+                item.selection +
+                ' @ ' +
+                item.odds.toFixed(2)
+            )
+            .join('\n');
 
-    loadUser();
 
-  </script>
+        alert(
 
-</body>
-</html>
+          '✅ DEMO BET PLACED\n\n' +
+
+          'Bet ID: ' +
+          bet.id +
+
+          '\n\n' +
+
+          selectionText +
+
+          '\n\nCombined odds: ' +
+          bet.total_odds.toFixed(2) +
+
+          '\nStake: ' +
+          bet.stake.toLocaleString() +
+
+          '\nPotential return: ' +
+          bet.potential_return.toLocaleString()
+
+        );
+
+
+        // Clear slip
+
+        selections = [];
+
+
+        document
+          .querySelectorAll('.odd')
+          .forEach(
+            btn =>
+              btn.classList.remove(
+                'selected'
+              )
+          );
+
+
+        document.getElementById(
+          'stake'
+        ).value = '';
+
+
+        document.getElementById(
+          'return'
+        ).innerText = '0';
+            
