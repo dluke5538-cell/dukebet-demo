@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DukeBet Demo</title>
 
+  <!-- Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -225,16 +228,31 @@
       text-align: center;
       margin-top: 50px;
     }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: #101218;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-size: 16px;
+    }
   </style>
 </head>
 
 <body>
 
+  <div id="loading" class="loading">
+    Loading DukeBet...
+  </div>
+
   <header class="header">
     <div class="logo">🏆 DukeBet</div>
 
     <div class="balance">
-      Demo: <span id="balance">100000</span>
+      Demo: <span id="balance">100,000</span>
     </div>
   </header>
 
@@ -303,7 +321,6 @@
 
       </div>
 
-
       <div class="match">
 
         <div class="league">
@@ -350,11 +367,9 @@
 
   </main>
 
-
   <button id="slipButton" class="slip" onclick="openSlip()">
     🎟 Bet Slip
   </button>
-
 
   <div id="slipModal" class="modal">
 
@@ -400,7 +415,6 @@
 
   </div>
 
-
   <nav class="bottom">
 
     <button class="active">
@@ -417,102 +431,278 @@
 
   </nav>
 
-
   <script>
 
-    let currentBet = null;
+    // ==============================
+    // TELEGRAM MINI APP
+    // ==============================
 
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    let telegramUser = null;
+    let currentBet = null;
     let balance = 100000;
 
 
-    function selectSport(element) {
+    // ==============================
+    // LOAD USER FROM DATABASE
+    // ==============================
 
-      document.querySelectorAll('.sport')
-        .forEach(s => s.classList.remove('active'));
+    async function loadUser() {
 
-      element.classList.add('active');
+      try {
 
-      if (element.innerText.includes('Football')) {
+        const user = tg.initDataUnsafe.user;
 
-        document.getElementById('matches').style.display = 'block';
-        document.getElementById('empty').style.display = 'none';
+        if (!user) {
 
-      } else {
+          document.getElementById('loading').innerText =
+            'Please open DukeBet from Telegram.';
 
-        document.getElementById('matches').style.display = 'none';
-        document.getElementById('empty').style.display = 'block';
+          return;
+
+        }
+
+        telegramUser = user;
+
+        const params = new URLSearchParams({
+
+          telegram_id: String(user.id),
+
+          username: user.username || '',
+
+          display_name:
+            ((user.first_name || '') + ' ' +
+             (user.last_name || '')).trim()
+
+        });
+
+
+        const response = await fetch(
+          '/api/user?' + params.toString()
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.success) {
+
+          throw new Error(
+            data.error || 'Unable to load account'
+          );
+
+        }
+
+
+        balance = Number(data.user.balance);
+
+
+        document.getElementById('balance').innerText =
+          balance.toLocaleString();
+
+
+        document.getElementById('loading').style.display =
+          'none';
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById('loading').innerText =
+          'Unable to connect to DukeBet. Please reopen the Mini App.';
 
       }
 
     }
 
 
-    function addBet(selection, odds) {
+    // ==============================
+    // SAVE BALANCE
+    // ==============================
 
-      currentBet = {
-        selection: selection,
-        odds: odds
-      };
+    async function saveBalance() {
 
-      document.getElementById('selection').innerText =
-        selection;
+      if (!telegramUser) return;
 
-      document.getElementById('odds').innerText =
-        odds.toFixed(2);
+      try {
 
-      document.getElementById('slipButton').style.display =
-        'block';
+        await fetch('/api/user', {
 
-      alert(selection + ' @ ' + odds.toFixed(2) +
-        ' added to your demo bet slip.');
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json'
+          },
+
+          body: JSON.stringify({
+
+            telegram_id: String(telegramUser.id),
+
+            balance: balance
+
+          })
+
+        });
+
+      } catch (error) {
+
+        console.error(
+          'Balance save failed:',
+          error
+        );
+
+      }
 
     }
 
+
+    // ==============================
+    // SPORTS
+    // ==============================
+
+    function selectSport(element) {
+
+      document.querySelectorAll('.sport')
+        .forEach(s =>
+          s.classList.remove('active')
+        );
+
+      element.classList.add('active');
+
+
+      if (element.innerText.includes('Football')) {
+
+        document.getElementById('matches')
+          .style.display = 'block';
+
+        document.getElementById('empty')
+          .style.display = 'none';
+
+      } else {
+
+        document.getElementById('matches')
+          .style.display = 'none';
+
+        document.getElementById('empty')
+          .style.display = 'block';
+
+      }
+
+    }
+
+
+    // ==============================
+    // ADD BET
+    // ==============================
+
+    function addBet(selection, odds) {
+
+      currentBet = {
+
+        selection: selection,
+
+        odds: odds
+
+      };
+
+
+      document.getElementById('selection')
+        .innerText = selection;
+
+
+      document.getElementById('odds')
+        .innerText = odds.toFixed(2);
+
+
+      document.getElementById('slipButton')
+        .style.display = 'block';
+
+
+      alert(
+        selection +
+        ' @ ' +
+        odds.toFixed(2) +
+        ' added to your demo bet slip.'
+      );
+
+    }
+
+
+    // ==============================
+    // OPEN SLIP
+    // ==============================
 
     function openSlip() {
 
       if (!currentBet) return;
 
-      document.getElementById('slipModal').style.display =
-        'flex';
+      document.getElementById('slipModal')
+        .style.display = 'flex';
 
     }
 
+
+    // ==============================
+    // CLOSE SLIP
+    // ==============================
 
     function closeSlip() {
 
-      document.getElementById('slipModal').style.display =
-        'none';
+      document.getElementById('slipModal')
+        .style.display = 'none';
 
     }
 
+
+    // ==============================
+    // CALCULATE RETURN
+    // ==============================
 
     function calculate() {
 
       const stake =
-        Number(document.getElementById('stake').value);
+        Number(
+          document.getElementById('stake').value
+        );
+
 
       if (!currentBet || !stake) {
 
-        document.getElementById('return').innerText = '0';
+        document.getElementById('return')
+          .innerText = '0';
 
         return;
 
       }
 
+
       const potential =
         stake * currentBet.odds;
 
-      document.getElementById('return').innerText =
+
+      document.getElementById('return')
+        .innerText =
         potential.toLocaleString();
 
     }
 
 
-    function placeBet() {
+    // ==============================
+    // PLACE DEMO BET
+    // ==============================
+
+    async function placeBet() {
 
       const stake =
-        Number(document.getElementById('stake').value);
+        Number(
+          document.getElementById('stake').value
+        );
+
 
       if (!stake || stake <= 0) {
 
@@ -522,6 +712,7 @@
 
       }
 
+
       if (stake > balance) {
 
         alert('Insufficient demo balance.');
@@ -530,34 +721,72 @@
 
       }
 
+
+      if (!telegramUser) {
+
+        alert('Your Telegram account has not loaded yet.');
+
+        return;
+
+      }
+
+
       balance -= stake;
 
-      document.getElementById('balance').innerText =
+
+      document.getElementById('balance')
+        .innerText =
         balance.toLocaleString();
+
 
       const potential =
         stake * currentBet.odds;
 
+
+      await saveBalance();
+
+
       alert(
-        '✅ DEMO BET PLACED\\n\\n' +
+
+        '✅ DEMO BET PLACED\n\n' +
+
         currentBet.selection +
+
         ' @ ' +
+
         currentBet.odds.toFixed(2) +
-        '\\n\\nStake: ' +
+
+        '\n\nStake: ' +
+
         stake.toLocaleString() +
-        '\\nPotential return: ' +
+
+        '\nPotential return: ' +
+
         potential.toLocaleString()
+
       );
+
 
       closeSlip();
 
-      document.getElementById('stake').value = '';
 
-      document.getElementById('return').innerText = '0';
+      document.getElementById('stake')
+        .value = '';
+
+
+      document.getElementById('return')
+        .innerText = '0';
 
     }
+
+
+    // ==============================
+    // START
+    // ==============================
+
+    loadUser();
 
   </script>
 
 </body>
-  </html>
+</html>
