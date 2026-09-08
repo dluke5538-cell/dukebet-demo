@@ -1,7 +1,9 @@
 export async function onRequestGet(context) {
   try {
     const url = new URL(context.request.url);
-    const telegram_id = String(url.searchParams.get("telegram_id") || "").trim();
+    const telegram_id = String(
+      url.searchParams.get("telegram_id") || ""
+    ).trim();
 
     if (!telegram_id) {
       return Response.json(
@@ -58,6 +60,39 @@ export async function onRequestGet(context) {
           selection_name
         };
       });
+
+      // Determine overall bet status
+      const selections = bet.selections;
+
+      if (!selections.length) {
+        bet.status = "open";
+        continue;
+      }
+
+      const allFinished = selections.every(
+        selection => selection.result !== null
+      );
+
+      if (!allFinished) {
+        bet.status = "open";
+        continue;
+      }
+
+      const allWon = selections.every(
+        selection => selection.selection === selection.result
+      );
+
+      bet.status = allWon ? "won" : "lost";
+
+      // Keep the database status in sync
+      await context.env.DB
+        .prepare(`
+          UPDATE bets
+          SET status = ?
+          WHERE id = ?
+        `)
+        .bind(bet.status, bet.id)
+        .run();
     }
 
     return Response.json({
