@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DukeBet</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#07111f;color:#fff;min-height:100vh}
+button{font:inherit}
+.app{max-width:700px;margin:auto;min-height:100vh;padding-bottom:90px}
+.header{position:sticky;top:0;z-index:20;background:#0a1728;border-bottom:1px solid #17283d;padding:15px 16px}
+.brand{display:flex;align-items:center;justify-content:space-between}
+.brand-name{font-size:22px;font-weight:800}.brand-sub{font-size:11px;color:#7f91a8;margin-top:3px}
+.user-pill{background:#12243a;border:1px solid #203852;border-radius:20px;padding:8px 11px;font-size:12px;color:#b9c8d9;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.content{padding:16px}.welcome{margin-bottom:16px}.welcome h2{margin:0;font-size:22px}.welcome p{margin:6px 0 0;color:#8193a9;font-size:13px}
+.sports{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px}.sports::-webkit-scrollbar{display:none}
+.sport-btn{flex:0 0 auto;border:1px solid #203852;background:#0d1d30;color:#9db0c5;padding:9px 15px;border-radius:20px;cursor:pointer}
+.sport-btn.active{background:#fff;color:#07111f;border-color:#fff;font-weight:700}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.section-title h3{margin:0;font-size:16px}
+.refresh{border:0;background:transparent;color:#8fa4bb;cursor:pointer;font-size:12px}
+.fixture{background:#0c1b2d;border:1px solid #182d45;border-radius:15px;padding:14px;margin-bottom:12px}
+.league{font-size:11px;color:#7f95ad;margin-bottom:9px;text-transform:uppercase;letter-spacing:.4px}
+.teams{display:flex;justify-content:space-between;gap:12px;font-weight:700;font-size:14px}.vs{color:#536a82;font-size:11px;align-self:center}
+.kickoff{color:#71869d;font-size:11px;margin:9px 0 12px}
+.markets{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.odd{border:1px solid #27405d;background:#10243a;color:#fff;border-radius:9px;padding:10px 5px;cursor:pointer;min-width:0}
+.odd:active{transform:scale(.98)}.odd.selected{background:#fff;color:#07111f;border-color:#fff}.odd.disabled{opacity:.45;cursor:not-allowed}
+.odd-label{display:block;font-size:10px;color:#8296ad;margin-bottom:3px}.odd.selected .odd-label{color:#4d5e70}.odd-value{font-weight:800;font-size:14px}
+.empty{text-align:center;padding:45px 20px;color:#71869d;background:#0c1b2d;border:1px solid #182d45;border-radius:15px}
+.error{background:#28151a;border:1px solid #5b2732;color:#e9a9b4;padding:13px;border-radius:12px;font-size:13px;margin-bottom:14px;display:none}
+.slip{position:fixed;left:50%;bottom:66px;transform:translateX(-50%);width:min(668px,calc(100% - 20px));background:#10243a;border:1px solid #29445f;border-radius:15px;padding:12px;z-index:30;box-shadow:0 10px 35px rgba(0,0,0,.35);display:none}
+.slip.visible{display:block}.slip-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.slip-title{font-weight:800;font-size:14px}
+.clear{background:transparent;border:0;color:#8da2b8;font-size:12px;cursor:pointer}
+.slip-item{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #1e3852;font-size:12px}
+.slip-item-name{min-width:0}.slip-item-name strong{display:block;margin-bottom:3px}.slip-item-name span{color:#8297ad}
+.remove{border:0;background:transparent;color:#9cafc2;cursor:pointer}
+.record-btn{width:100%;margin-top:9px;border:0;background:#fff;color:#07111f;border-radius:10px;padding:11px;font-weight:800;cursor:pointer}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(700px,100%);height:62px;background:#091727;border-top:1px solid #182d45;display:grid;grid-template-columns:repeat(3,1fr);z-index:40}
+.nav-btn{border:0;background:transparent;color:#70869e;cursor:pointer;font-size:11px}.nav-btn.active{color:#fff;font-weight:700}
+.page{display:none}.page.active{display:block}
+.my-bet{background:#0c1b2d;border:1px solid #182d45;border-radius:15px;padding:14px;margin-bottom:12px}
+.bet-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}.bet-id{font-size:11px;color:#7e94aa}
+.status{font-size:10px;text-transform:uppercase;border-radius:10px;padding:4px 7px;background:#172d43;color:#a8bacd}
+.bet-selection{padding:8px 0;border-top:1px solid #182d45;font-size:12px}
+.profile-card{background:#0c1b2d;border:1px solid #182d45;border-radius:15px;padding:18px}
+.profile-row{padding:12px 0;border-bottom:1px solid #182d45}.profile-row:last-child{border-bottom:0}
+.profile-label{color:#71869d;font-size:11px;margin-bottom:4px}.profile-value{font-size:14px;word-break:break-word}
+.loading-inline{text-align:center;padding:35px 10px;color:#71869d}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div class="brand">
+<div><div class="brand-name">🏆 DukeBet</div><div class="brand-sub">Sportsbook</div></div>
+<div class="user-pill" id="userName">Guest</div>
+</div>
+</header>
+
+<main class="content">
+<div id="errorBox" class="error"></div>
+
+<section id="homePage" class="page active">
+<div class="welcome"><h2>Welcome to DukeBet</h2><p>Select a fixture and add your prediction to the bet slip.</p></div>
+
+<div class="sports">
+<button class="sport-btn active" data-sport="all">All</button>
+<button class="sport-btn" data-sport="football">Football</button>
+<button class="sport-btn" data-sport="basketball">Basketball</button>
+<button class="sport-btn" data-sport="tennis">Tennis</button>
+</div>
+
+<div class="section-title"><h3>Upcoming fixtures</h3><button class="refresh" onclick="loadFixtures()">↻ Refresh</button></div>
+<div id="fixtures"><div class="loading-inline">Loading fixtures...</div></div>
+</section>
+
+<section id="betsPage" class="page">
+<div class="welcome"><h2>My Bets</h2><p>Your recorded selections and their current status.</p></div>
+<div id="myBets"><div class="loading-inline">Loading...</div></div>
+</section>
+
+<section id="profilePage" class="page">
+<div class="welcome"><h2>Profile</h2><p>Your DukeBet account information.</p></div>
+<div class="profile-card">
+<div class="profile-row"><div class="profile-label">Name</div><div class="profile-value" id="profileName">—</div></div>
+<div class="profile-row"><div class="profile-label">Username</div><div class="profile-value" id="profileUsername">—</div></div>
+<div class="profile-row"><div class="profile-label">Telegram ID</div><div class="profile-value" id="profileTelegramId">—</div></div>
+</div>
+</section>
+</main>
+</div>
+
+<div id="slip" class="slip">
+<div class="slip-head"><div class="slip-title">Bet Slip (<span id="slipCount">0</span>)</div><button class="clear" onclick="clearSlip()">Clear</button></div>
+<div id="slipItems"></div>
+<button class="record-btn" onclick="recordBet()">RECORD BET SLIP</button>
+</div>
+
+<nav class="bottom-nav">
+<button class="nav-btn active" id="homeNav" onclick="showPage('home')">🏠<br>Home</button>
+<button class="nav-btn" id="betsNav" onclick="showPage('bets')">🎟️<br>My Bets</button>
+<button class="nav-btn" id="profileNav" onclick="showPage('profile')">👤<br>Profile</button>
+</nav>
+
+<script>
+const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
+if(tg){tg.ready();tg.expand();}
+
+let currentSport="all";
+let fixtures=[];
+let betSlip=[];
+let currentUser=null;
+
+function showError(message){const box=document.getElementById("errorBox");box.innerText=message;box.style.display="block";}
+function hideError(){document.getElementById("errorBox").style.display="none";}
+
+function getTelegramUser(){
+if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)return tg.initDataUnsafe.user;
+return{id:"web-demo-user",username:"guest",first_name:"Guest",last_name:""};
+}
+
+async function loadUser(){
+const user=getTelegramUser();
+currentUser=user;
+const displayName=[user.first_name,user.last_name].filter(Boolean).join(" ")||user.username||"Guest";
+document.getElementById("userName").innerText=displayName;
+document.getElementById("profileName").innerText=displayName;
+document.getElementById("profileUsername").innerText=user.username?"@"+user.username:"Not available";
+document.getElementById("profileTelegramId").innerText=user.id;
+
+try{
+await fetch("/api/user?telegram_id="+encodeURIComponent(user.id)+"&username="+encodeURIComponent(user.username||"")+"&display_name="+encodeURIComponent(displayName));
+}catch(error){console.log("User registration failed:",error);}
+}
+
+async function loadFixtures(){
+const container=document.getElementById("fixtures");
+container.innerHTML='<div class="loading-inline">Loading fixtures...</div>';
+hideError();
+
+try{
+const response=await fetch("/api/fixtures");
+if(!response.ok)throw new Error("Unable to load fixtures");
+const data=await response.json();
+fixtures=Array.isArray(data.fixtures)?data.fixtures:[];
+renderFixtures();
+}catch(error){
+console.error(error);
+container.innerHTML='<div class="empty">Fixtures could not be loaded.<br><br>Please try again.</div>';
+showError("Unable to connect to the fixture server.");
+}
+}
+
+function renderFixtures(){
+const container=document.getElementById("fixtures");
+let list=fixtures;
+if(currentSport!=="all")list=fixtures.filter(f=>String(f.sport).toLowerCase()===currentSport);
+if(!list.length){container.innerHTML='<div class="empty">No fixtures available for this sport.</div>';return;}
+container.innerHTML=list.map(renderFixture).join("");
+}
+
+function renderFixture(fixture){
+const status=String(fixture.status||"open").toLowerCase();
+const suspended=status!=="open";
+const homeSelected=isSelected(fixture.id,"home");
+const drawSelected=isSelected(fixture.id,"draw");
+const awaySelected=isSelected(fixture.id,"away");
+
+return `<div class="fixture">
+<div class="league">${escapeHtml(fixture.league||fixture.sport||"Sport")}</div>
+<div class="teams"><div>${escapeHtml(fixture.home_team)}</div><div class="vs">VS</div><div>${escapeHtml(fixture.away_team)}</div></div>
+<div class="kickoff">${escapeHtml(formatKickoff(fixture.kickoff))}</div>
+<div class="markets">
+<button class="odd ${homeSelected?"selected":""} ${suspended||fixture.home_odds==null?"disabled":""}" onclick="selectOdd('${escapeAttr(fixture.id)}','home')" ${suspended||fixture.home_odds==null?"disabled":""}><span class="odd-label">HOME</span><span class="odd-value">${fixture.home_odds??"—"}</span></button>
+<button class="odd ${drawSelected?"selected":""} ${suspended||fixture.draw_odds==null?"disabled":""}" onclick="selectOdd('${escapeAttr(fixture.id)}','draw')" ${suspended||fixture.draw_odds==null?"disabled":""}><span class="odd-label">DRAW</span><span class="odd-value">${fixture.draw_odds??"—"}</span></button>
+<button class="odd ${awaySelected?"selected":""} ${suspended||fixture.away_odds==null?"disabled":""}" onclick="selectOdd('${escapeAttr(fixture.id)}','away')" ${suspended||fixture.away_odds==null?"disabled":""}><span class="odd-label">AWAY</span><span class="odd-value">${fixture.away_odds??"—"}</span></button>
+</div>
+${suspended?`<div style="margin-top:9px;color:#9c8290;font-size:11px;">Market ${escapeHtml(status)}</div>`:""}
+</div>`;
+}
+
+function selectOdd(fixtureId,selection){
+const fixture=fixtures.find(item=>String(item.id)===String(fixtureId));
+if(!fixture||String(fixture.status).toLowerCase()!=="open")return;
+
+const oddsMap={home:fixture.home_odds,draw:fixture.draw_odds,away:fixture.away_odds};
+const odds=Number(oddsMap[selection]);
+if(!Number.isFinite(odds)||odds<=0)return;
+
+const existingIndex=betSlip.findIndex(item=>String(item.fixture_id)===String(fixtureId));
+const item={fixture_id:String(fixture.id),home_team:fixture.home_team,away_team:fixture.away_team,selection,odds};
+
+if(existingIndex>=0){
+if(betSlip[existingIndex].selection===selection)betSlip.splice(existingIndex,1);
+else betSlip[existingIndex]=item;
+}else betSlip.push(item);
+
+renderFixtures();
+renderSlip();
+}
+
+function isSelected(fixtureId,selection){
+return betSlip.some(item=>String(item.fixture_id)===String(fixtureId)&&item.selection===selection);
+}
+
+function selectionName(item){
+if(item.selection==="home")return item.home_team;
+if(item.selection==="away")return item.away_team;
+return "Draw";
+}
+
+function renderSlip(){
+const slip=document.getElementById("slip");
+const items=document.getElementById("slipItems");
+document.getElementById("slipCount").innerText=betSlip.length;
+
+if(!betSlip.length){slip.classList.remove("visible");items.innerHTML="";return;}
+slip.classList.add("visible");
+
+items.innerHTML=betSlip.map((item,index)=>`
+<div class="slip-item">
+<div class="slip-item-name"><strong>${escapeHtml(selectionName(item))}</strong><span>${escapeHtml(item.home_team)} vs ${escapeHtml(item.away_team)} · ${item.odds}</span></div>
+<button class="remove" onclick="removeSelection(${index})">✕</button>
+</div>`).join("");
+}
+
+function removeSelection(index){betSlip.splice(index,1);renderFixtures();renderSlip();}
+function clearSlip(){betSlip=[];renderFixtures();renderSlip();}
+
+async function recordBet(){
+if(!betSlip.length)return;
+if(!currentUser){alert("Your Telegram profile could not be loaded.");return;}
+
+const button=document.querySelector(".record-btn");
+button.disabled=true;button.innerText="RECORDING...";
+
+try{
+const response=await fetch("/api/bets",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+telegram_id:String(currentUser.id),
+selections:betSlip.map(item=>({fixture_id:item.fixture_id,selection:item.selection}))
+})
+});
+const data=await response.json();
+if(!response.ok)throw new Error(data.error||"Unable to record bet");
+
+alert("Bet recorded successfully.\n\nBet ID: "+data.bet.id);
+clearSlip();
+await loadMyBets();
+}catch(error){
+console.error(error);
+alert(error.message||"Unable to record the bet.");
+}finally{
+button.disabled=false;button.innerText="RECORD BET SLIP";
+}
+}
+
+async function loadMyBets(){
+const container=document.getElementById("myBets");
+container.innerHTML='<div class="loading-inline">Loading...</div>';
+if(!currentUser){container.innerHTML='<div class="empty">Telegram profile unavailable.</div>';return;}
+
+try{
+const response=await fetch("/api/my-bets?telegram_id="+encodeURIComponent(currentUser.id));
+if(!response.ok)throw new Error("Unable to load bets");
+const data=await response.json();
+const bets=Array.isArray(data.bets)?data.bets:[];
+
+if(!bets.length){container.innerHTML='<div class="empty">You don\'t have any recorded bets yet.</div>';return;}
+container.innerHTML=bets.map(renderBet).join("");
+}catch(error){
+console.error(error);
+container.innerHTML='<div class="empty">Your bets could not be loaded.</div>';
+}
+}
+
+function renderBet(bet){
+const selections=Array.isArray(bet.selections)?bet.selections:[];
+return `<div class="my-bet">
+<div class="bet-top"><div><strong>Bet Slip</strong><div class="bet-id">${escapeHtml(bet.id||"—")}</div></div><div class="status">${escapeHtml(bet.status||"open")}</div></div>
+${selections.map(selection=>`<div class="bet-selection"><strong>${escapeHtml(selection.selection_name||selection.selection)}</strong><div style="color:#71869d;margin-top:3px;">${escapeHtml(selection.home_team||"")} vs ${escapeHtml(selection.away_team||"")} · Odds ${escapeHtml(String(selection.odds??"—"))}</div></div>`).join("")}
+</div>`;
+}
+
+function showPage(page){
+document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"));
+document.querySelectorAll(".nav-btn").forEach(e=>e.classList.remove("active"));
+
+if(page==="home"){document.getElementById("homePage").classList.add("active");document.getElementById("homeNav").classList.add("active");}
+if(page==="bets"){document.getElementById("betsPage").classList.add("active");document.getElementById("betsNav").classList.add("active");loadMyBets();}
+if(page==="profile"){document.getElementById("profilePage").classList.add("active");document.getElementById("profileNav").classList.add("active");}
+}
+
+function formatKickoff(value){
+if(!value)return"Kickoff time unavailable";
+const date=new Date(String(value).replace(" ","T"));
+if(Number.isNaN(date.getTime()))return String(value);
+return date.toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+
+function escapeHtml(value){
+return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+function escapeAttr(value){
+return String(value??"").replaceAll("\\","\\\\").replaceAll("'","\\'");
+}
+
+document.querySelectorAll(".sport-btn").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll(".sport-btn").forEach(item=>item.classList.remove("active"));
+button.classList.add("active");
+currentSport=button.dataset.sport;
+renderFixtures();
+});
+});
+
+async function startApp(){
+try{await loadUser();await loadFixtures();}
+catch(error){console.error(error);showError("DukeBet could not finish loading.");}
+}
+
+startApp();
+</script>
+</body>
+</html>
