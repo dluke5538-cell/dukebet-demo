@@ -1,5 +1,14 @@
 export async function onRequestPost(context) {
   try {
+    const adminKey = context.request.headers.get("x-admin-key");
+
+    if (!adminKey || adminKey !== context.env.ADMIN_KEY) {
+      return Response.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
     const body = await context.request.json();
 
     const fixture_id = String(body.fixture_id || "").trim();
