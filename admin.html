@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DukeBet Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #111827;
+    }
+
+    .header {
+      background: #111827;
+      color: white;
+      padding: 18px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 19px;
+    }
+
+    label {
+      display: block;
+      margin-top: 13px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 9px;
+      padding: 13px;
+      margin-top: 16px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #111827;
+      color: white;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .odds {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>🏆 DukeBet Admin</h1>
+    <p>Fixture management panel</p>
+  </div>
+
+  <div class="container">
+
+    <!-- ADMIN LOGIN -->
+    <div class="card">
+      <h2>🔐 Admin Access</h2>
+
+      <label>Admin Key</label>
+      <input
+        type="password"
+        id="adminKey"
+        placeholder="Enter your admin key"
+      >
+
+      <div class="small">
+        Your key is kept only in this browser session and is not saved in the page source.
+      </div>
+
+      <button onclick="saveAdminKey()">Unlock Admin Panel</button>
+
+      <div id="authMessage" class="message"></div>
+    </div>
+
+    <!-- ADD FIXTURE -->
+    <div class="card">
+      <h2>➕ Add Fixture</h2>
+
+      <label>Fixture ID</label>
+      <input id="fixtureId" placeholder="Example: MUN-CHE-001">
+
+      <label>Sport</label>
+      <select id="sport">
+        <option value="football">Football</option>
+        <option value="basketball">Basketball</option>
+        <option value="tennis">Tennis</option>
+      </select>
+
+      <label>League</label>
+      <input id="league" placeholder="Example: Premier League">
+
+      <div class="row">
+        <div>
+          <label>Home Team</label>
+          <input id="homeTeam" placeholder="Home team">
+        </div>
+
+        <div>
+          <label>Away Team</label>
+          <input id="awayTeam" placeholder="Away team">
+        </div>
+      </div>
+
+      <label>Kickoff</label>
+      <input id="kickoff" type="datetime-local">
+
+      <label>Odds</label>
+
+      <div class="odds">
+        <input id="homeOdds" type="number" step="0.01" placeholder="Home">
+        <input id="drawOdds" type="number" step="0.01" placeholder="Draw">
+        <input id="awayOdds" type="number" step="0.01" placeholder="Away">
+      </div>
+
+      <button onclick="addFixture()">Add Fixture</button>
+
+      <div id="fixtureMessage" class="message"></div>
+    </div>
+
+    <!-- SET RESULT -->
+    <div class="card">
+      <h2>🏁 Set Match Result</h2>
+
+      <label>Fixture ID</label>
+      <input id="resultFixtureId" placeholder="Example: MUN-CHE-001">
+
+      <label>Result</label>
+      <select id="result">
+        <option value="home">Home Win</option>
+        <option value="draw">Draw</option>
+        <option value="away">Away Win</option>
+      </select>
+
+      <button onclick="setResult()">Set Result</button>
+
+      <div id="resultMessage" class="message"></div>
+    </div>
+
+  </div>
+
+<script>
+
+let adminKey = "";
+
+function showMessage(elementId, message, type) {
+  const element = document.getElementById(elementId);
+
+  element.textContent = message;
+  element.className = "message " + type;
+}
+
+function saveAdminKey() {
+  const key = document.getElementById("adminKey").value.trim();
+
+  if (!key) {
+    showMessage(
+      "authMessage",
+      "Please enter your admin key.",
+      "error"
+    );
+    return;
+  }
+
+  adminKey = key;
+
+  showMessage(
+    "authMessage",
+    "Admin key loaded. You can now manage fixtures.",
+    "success"
+  );
+}
+
+async function addFixture() {
+
+  if (!adminKey) {
+    showMessage(
+      "fixtureMessage",
+      "Unlock the admin panel first.",
+      "error"
+    );
+    return;
+  }
+
+  const data = {
+    id: document.getElementById("fixtureId").value.trim(),
+    sport: document.getElementById("sport").value,
+    league: document.getElementById("league").value.trim(),
+    home_team: document.getElementById("homeTeam").value.trim(),
+    away_team: document.getElementById("awayTeam").value.trim(),
+    kickoff: document.getElementById("kickoff").value,
+    home_odds: Number(document.getElementById("homeOdds").value),
+    draw_odds: Number(document.getElementById("drawOdds").value),
+    away_odds: Number(document.getElementById("awayOdds").value)
+  };
+
+  try {
+
+    const response = await fetch("/api/admin-fixtures", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Unable to add fixture.");
+    }
+
+    showMessage(
+      "fixtureMessage",
+      "Fixture added successfully.",
+      "success"
+    );
+
+  } catch (error) {
+
+    showMessage(
+      "fixtureMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+async function setResult() {
+
+  if (!adminKey) {
+    showMessage(
+      "resultMessage",
+      "Unlock the admin panel first.",
+      "error"
+    );
+    return;
+  }
+
+  const data = {
+    fixture_id: document.getElementById("resultFixtureId").value.trim(),
+    result: document.getElementById("result").value
+  };
+
+  try {
+
+    const response = await fetch("/api/result", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Unable to set result.");
+    }
+
+    showMessage(
+      "resultMessage",
+      "Match result updated successfully.",
+      "success"
+    );
+
+  } catch (error) {
+
+    showMessage(
+      "resultMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+</script>
+
+</body>
+</html>
